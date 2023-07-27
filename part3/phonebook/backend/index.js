@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+// eslint-disable-next-line no-unused-vars
 const static = require('static')
 require('dotenv').config()
 
@@ -22,36 +23,35 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(express.json())
 app.use(morgan((tokens, req, res) => {
-    return [
-      tokens.method(req, res),
-      tokens.url(req, res),
-      tokens.status(req, res),
-      tokens.res(req, res, 'content-length'), '-',
-      tokens['response-time'](req, res), 'ms',
-      JSON.stringify(req.body)
-    ].join(' ')
-  }))
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    JSON.stringify(req.body)
+  ].join(' ')
+}))
 app.use(express.static('build'))
 
-let people = []
 
 app.get('/api/people', (request, response) => {
   Person.find({}).then(people => {
     response.json(people)
   })
-}) 
+})
 
 app.get('/info', (request, response) => {
   Person.find({}).then(people => {
     const length = people.length
     const date = new Date()
     response.send(
-        `<div><p>Phonebook has info for ${length} people</p><p>${date}</p></div>`
+      `<div><p>Phonebook has info for ${length} people</p><p>${date}</p></div>`
     )
   })
-}) 
+})
 
-app.get('/api/people/:id', (request, response) => {
+app.get('/api/people/:id', (request, response, next) => {
   Person.findById(request.params.id).then(person => {
     if (person) {
       response.json(person)
@@ -60,24 +60,24 @@ app.get('/api/people/:id', (request, response) => {
       response.status(404).end()
     }
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.post('/api/people', (request, response, next) => {
-    const body = request.body
+  const body = request.body
 
-    if (!body.name || !body.number) {
-        return response.status(400).json( {error: 'name or number is missing'} )
-    }
+  if (!body.name || !body.number) {
+    return response.status(400).json( { error: 'name or number is missing' } )
+  }
 
-    const person = new Person({
-        name: body.name, 
-        number: body.number
-    })
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
 
-    person.save().then(savedPerson => {
-      response.json(savedPerson)
-    })
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
     .catch(error => next(error))
 })
 
@@ -89,7 +89,7 @@ app.put('/api/people/:id', (request, response, next) => {
     number: body.number
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' }) 
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
@@ -98,7 +98,7 @@ app.put('/api/people/:id', (request, response, next) => {
 
 app.delete('/api/people/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
