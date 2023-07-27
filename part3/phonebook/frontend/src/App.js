@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import PersonForm from './component/PersonForm'
 import Filter from './component/Filter'
-import Persons from './component/Persons'
-import personsService from './services/persons'
+import People from './component/People'
+import peopleService from './services/people'
 import Notification from './component/Notification'
 import './index.css'
 
 const App = () => {
-  const [persons, setPersons] = useState([])
+  const [people, setPeople] = useState([])
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [filterInput, setFilterInput] = useState('')
@@ -15,35 +15,30 @@ const App = () => {
   const [message, setMessage] = useState(null)
   const [messageType, setMessageType] = useState('')
 
-  const personFilter = persons.filter(elem => elem.name.includes(filterInput))
+  const personFilter = people.filter(elem => elem.name.includes(filterInput))
 
   useEffect(() => {
-    personsService
+    peopleService
       .getAll()
-      .then(initialPersons => {
-        setPersons(initialPersons)
+      .then(initialPeople => {
+        setPeople(initialPeople)
 
-        let maxId = 0;
-        initialPersons.forEach(person => {
-          if (person.id > maxId) {
-            maxId = person.id
-          }
-        })
+        const maxId = Math.max(...initialPeople.map(person => person.id))
 
         setIdCount(maxId + 1)
       })
   }, [])
 
   const remove = id => {
-    const person = persons.find(p => p.id === id)
+    const person = people.find(p => p.id === id)
 
     if (window.confirm(`Delete ${person.name}?`)) {
-      personsService
+      peopleService
         .remove(id)
         .catch(err => {
           alert('can\'t delete')
         })
-      setPersons(persons.filter(p => p.id !== id))
+      setPeople(people.filter(p => p.id !== id))
     }
   }
 
@@ -58,21 +53,21 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault()
     setIdCount()
-    const existingPerson = persons.find((person) => person.name === newName);
+    const existingPerson = people.find((person) => person.name === newName);
 
     if (existingPerson) {
       if (window.confirm(`${newName} is already added to the phonebook, replace the old number with new one?`)) {
         const updatedPerson = { ...existingPerson, number: newPhone }
 
-        personsService
+        peopleService
           .update(existingPerson.id, updatedPerson)
           .then(returnedPerson => {
-            const updatedIndex = persons.findIndex(person => person.id === existingPerson.id)
+            const updatedIndex = people.findIndex(person => person.id === existingPerson.id)
 
-            const updatedPersons = [...persons]
-            updatedPersons[updatedIndex] = returnedPerson
+            const updatedPeople = [...people]
+            updatedPeople[updatedIndex] = returnedPerson
 
-            setPersons(updatedPersons)
+            setPeople(updatedPeople)
             setNewName('')
             setNewPhone('')
             setNewMessage(`Person ${returnedPerson.name} got number updated to ${returnedPerson.number}`, 'info')
@@ -80,21 +75,21 @@ const App = () => {
           .catch(error => {
             console.error("Error updating person:", error)
             setNewMessage(`Information of ${updatedPerson.name} has been removed from the server`, 'error')
-            setPersons(persons.filter(p => p.id !== updatedPerson.id))
+            setPeople(people.filter(p => p.id !== updatedPerson.id))
           });
       }
     } else {
       setIdCount(idCount + 1)
       const personObject = { name: newName, number: newPhone, id: idCount }
-      personsService
+      peopleService
         .create(personObject)
         .then(returnedPerson => {
-          setPersons(persons.concat(returnedPerson))
+          setPeople(people.concat(returnedPerson))
           setNewName('')
           setNewPhone('')
+          setNewMessage(`Added new person ${personObject.name}`, 'info')
         })
-      setNewMessage(`Added new person ${personObject.name}`, 'info')
-
+        .catch(err => setNewMessage(err.response.data.error, 'error'))
     }
   }
 
@@ -120,7 +115,7 @@ const App = () => {
         handleNameChange={handleNameChange}
         handlePhoneChange={handlePhoneChange} />
       <h2>Numbers</h2>
-      <Persons personFilter={personFilter} del={remove} />
+      <People personFilter={personFilter} del={remove} />
     </div>
   )
 }

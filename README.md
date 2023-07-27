@@ -1,1 +1,11 @@
-# FSO
+# Full Stack Open
+
+## What is it?
+<sub><em>Copied from https://fullstackopen.com/en/about/</em></sub>
+<p align="justify">This course serves as an introduction to modern web application development with JavaScript. The main focus is on building single page applications with ReactJS that use REST APIs built with Node.js. The course also contains a section on GraphQL, a modern alternative to REST APIs.
+The course covers testing, configuration and environment management, the use of databases for storing the application’s data amongst other things.</p>
+
+## Acomplishment links
+<ul>
+    <li>part3 phonebook: https://phonebook-ftkj.onrender.com/</li>
+</ul>
