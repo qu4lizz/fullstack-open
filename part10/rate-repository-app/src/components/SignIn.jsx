@@ -4,6 +4,8 @@ import theme from "../theme";
 import Text from "./Text";
 import * as yup from "yup";
 import useSignIn from "../hooks/useSignIn";
+import { useNavigate } from "react-router-native";
+import useAuthStorage from "../hooks/useAuthStorage";
 
 const styles = StyleSheet.create({
   container: {
@@ -37,6 +39,8 @@ const styles = StyleSheet.create({
 
 const SignIn = () => {
   const [signIn, result] = useSignIn();
+  const navigate = useNavigate();
+  const authStorage = useAuthStorage();
 
   const initialValues = {
     username: "",
@@ -47,8 +51,9 @@ const SignIn = () => {
     const { username, password } = values;
 
     try {
-      const data = await signIn({ username, password });
-      console.log(data);
+      await signIn({ username, password });
+      console.log("aa", authStorage.getAccessToken());
+      navigate("/");
     } catch (e) {
       console.log(e);
     }

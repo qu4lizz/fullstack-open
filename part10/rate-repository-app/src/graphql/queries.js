@@ -13,8 +13,18 @@ export const GET_REPOSITORIES = gql`
           reviewCount
           ratingAverage
           stargazersCount
+          ownerAvatarUrl
         }
       }
+    }
+  }
+`;
+
+export const GET_ME = gql`
+  query {
+    me {
+      id
+      username
     }
   }
 `;
